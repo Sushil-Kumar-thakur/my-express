@@ -7,6 +7,8 @@ import { fileURLToPath } from 'url';
 import { timeLogger } from './Middleware_Function/Middleware.js';
 import { workingHoursMiddleware } from './Middleware_Function/Middleware-task-2.js';
 import methodOverride from 'method-override'; 
+import expressLayouts from 'express-ejs-layouts';
+
 const app = express();
 const port = 3000;
 
@@ -15,6 +17,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // ============ CONFIG ============
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.set('layout', 'layout');
+app.use(expressLayouts); 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -106,7 +110,10 @@ app.get('/users/:id', (req, res) => {
 
 // Show form
 app.get('/user-details', (req, res) => {
-  res.render('register');
+  res.render('register', {
+  title: 'User Registration',
+  currentRoute: '/user-details'
+});
 });
 
 // Handle form POST and save data
