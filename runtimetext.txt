@@ -1,0 +1,120 @@
+/                              middleware
+
+import express from 'express';
+import { timeLogger } from './Middleware Function/Middleware.js';
+import { workingHoursMiddleware } from './Middleware Function/Middleware-task-2.js';
+import fs from 'fs';
+import path from 'path';
+
+const app = express();
+const port = 3000;
+
+// Enable JSON parsing
+app.use(express.json());
+
+// Path to users file
+const usersPath = path.join('data', 'users.json');
+
+// Helpers to read/write user data
+const readUsers = () => {
+  const rawData = fs.readFileSync(usersPath, 'utf-8');
+  return JSON.parse(rawData);
+};
+
+const writeUsers = (users) => {
+  fs.writeFileSync(usersPath, JSON.stringify(users, null, 2));
+};
+
+// Home
+app.get('/', (req, res) => {
+  res.send('🏠 Home Page');
+});
+
+// About
+app.get('/about', (req, res) => {
+  res.send('ℹ️ About Page');
+});
+
+// Open route with middleware
+app.get('/open', workingHoursMiddleware, (req, res) => {
+  res.send('✅ Welcome! You accessed during working hours.');
+});
+
+// Contact route with timeLogger middleware
+app.get('/contact', timeLogger, (req, res) => {
+  res.send(`📞 Contact Page - Visited at ${req.timeVisited}`);
+});
+
+// Services route
+app.get('/services', (req, res) => {
+  res.json({
+    web: true,
+    mobile: false,
+    desktop: true
+  });
+});
+
+// POST route
+app.post('/submit', (req, res) => {
+  res.send('Data received via POST');
+});
+
+// PUT route
+app.put('/update', (req, res) => {
+  res.send('Data updated with PUT');
+});
+
+// DELETE route
+app.delete('/delete', (req, res) => {
+  res.send('Item deleted with DELETE');
+});
+
+
+// 🔹 View all users
+app.get('/users', (req, res) => {
+  const users = readUsers();
+  res.json(users);
+});
+
+// 🔹 View specific user by ID
+app.get('/users/:id', (req, res) => {
+  const users = readUsers();
+  const userId = parseInt(req.params.id);
+  const user = users.find(u => u.id === userId);
+
+  user ? res.json(user) : res.status(404).send('User not found');
+});
+
+// 🔹 Add new user (POST)
+app.post('/users', (req, res) => {
+  const users = readUsers();
+  const newUser = req.body;
+
+  // Auto-generate new ID
+  newUser.id = users.length ? users[users.length - 1].id + 1 : 1;
+
+  users.push(newUser);
+  writeUsers(users);
+
+  res.status(201).json({ message: 'User added', user: newUser });
+});
+
+// 🔹 Delete user by ID
+app.delete('/users/:id', (req, res) => {
+  let users = readUsers();
+  const userId = parseInt(req.params.id);
+  const index = users.findIndex(u => u.id === userId);
+
+  if (index !== -1) {
+    const removedUser = users.splice(index, 1)[0];
+    writeUsers(users);
+    res.json({ message: 'User deleted', user: removedUser });
+  } else {
+    res.status(404).send('User not found');
+  }
+});
+
+// Start server
+app.listen(port, () => {
+  console.log(`🚀 Server running at http://localhost:${port}`);
+});
