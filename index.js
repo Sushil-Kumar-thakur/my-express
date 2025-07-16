@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 
 import { timeLogger } from './Middleware_Function/Middleware.js';
 import { workingHoursMiddleware } from './Middleware_Function/Middleware-task-2.js';
+import { validateForm } from './Middleware_Function/validate.js';
 import methodOverride from 'method-override'; 
 import expressLayouts from 'express-ejs-layouts';
 
@@ -29,94 +30,74 @@ const users = JSON.parse(fs.readFileSync('./data/users.json', 'utf-8'));
 
 // ============ ROUTES ============
 
-// ➤ Home
 app.get('/', (req, res) => {
   res.send('🏠 Home Page');
 });
 
-// ➤ About
 app.get('/about', (req, res) => {
   res.send('ℹ️ About Page');
 });
 
-// ➤ Contact (EJS)
 app.get('/contact', (req, res) => {
   res.render('contact');
 });
 
-// ➤ Contact (middleware logger)
 app.get('/contact-visit', timeLogger, (req, res) => {
   res.send(`📞 Contact Page - Visited at ${req.timeVisited}`);
 });
 
-// ➤ Register page with variables
 app.get('/enter', (req, res) => {
   res.render("index", { age: 25, name: 'Sushil', city: 'Delhi' });
 });
 
-// ➤ Open only during working hours
 app.get('/compeny-open', workingHoursMiddleware, (req, res) => {
   res.send('✅ Welcome! You accessed during working hours.');
 });
 
-// ➤ EJS Search Form
+// ➤ Show login form
 app.get('/form', (req, res) => {
-  res.render('search');
+  res.render('search', { title: 'Login | AI Tool' });
 });
 
-// ➤ Search (GET with Query)
-app.get('/search', (req, res) => {
-  const { name, city } = req.query;
-  if (!name || !city) {
-    return res.send('❌ Please provide both name and city in query');
-  }
-  res.send(`🔍 Searching for ${name} in ${city}`);
+// ➤ Handle login form (GET)
+app.get('/search', (req, res, next) => {
+  req.body = req.query;
+  validateForm(req, res, () => {
+    const { name } = req.query;
+    res.render('success', { title: 'Success', name });
+  });
 });
 
-// ➤ Dynamic Route (1 param)
 app.get('/student/:user', (req, res) => {
   res.send(`student name - <h1>${req.params.user}</h1>`);
 });
 
-// ➤ Dynamic Route (2 params)
 app.get('/student/:name/:city', (req, res) => {
   const { name, city } = req.params;
   res.send(`${name} lives in ${city}`);
 });
 
-// ➤ Services
 app.get('/services', (req, res) => {
-  res.json({
-    web: true,
-    mobile: false,
-    desktop: true
-  });
+  res.json({ web: true, mobile: false, desktop: true });
 });
 
-
-
-// ✅ All users
 app.get('/users', (req, res) => {
   res.json(users);
 });
 
-// ✅ Single user by ID
 app.get('/users/:id', (req, res) => {
   const userId = parseInt(req.params.id);
   const user = users.find(u => u.id === userId);
   user ? res.json(user) : res.status(404).send('User not found');
 });
 
-
-// Show form
 app.get('/user-details', (req, res) => {
   res.render('register', {
-  title: 'User Registration',
-  currentRoute: '/user-details'
-});
+    title: 'User Registration',
+    currentRoute: '/user-details'
+  });
 });
 
-// Handle form POST and save data
 app.post('/register', (req, res) => {
   const { name, email, city } = req.body;
   const rawData = fs.readFileSync('./data/users.json');
@@ -132,48 +113,36 @@ app.post('/register', (req, res) => {
   users.push(newUser);
   fs.writeFileSync('./data/users.json', JSON.stringify(users, null, 2)); 
 
-  // 🟢 Redirect with message as query param
-  res.redirect(`/success?name=${encodeURIComponent(name)}&city=${encodeURIComponent(city)}&city=${encodeURIComponent(email)}`);
+  res.redirect(`/success?name=${encodeURIComponent(name)}&city=${encodeURIComponent(city)}&email=${encodeURIComponent(email)}`);
 });
-
 
 app.get('/success', (req, res) => {
   const { name, city } = req.query;
-res.render ('success', {
-  name,
-  city
+  res.render('success', {
+    name,
+    city
   });
-
 });
- 
 
-//  update  user 
 app.get('/edit/:id', (req, res) => {
   const userId = parseInt(req.params.id);
   const user = users.find(u => u.id === userId);
-  res.render('update', { user }); // user = { id, name, email, city }
+  res.render('update', { user });
 });
-  
-// ✅ Handle form submission with PUT methods
+
 app.put('/update/:id', (req, res) => {
   const userId = parseInt(req.params.id);
   const { name, email, city } = req.body;
 
-  // Update logic
   const userIndex = users.findIndex(u => u.id === userId);
   if (userIndex !== -1) {
     users[userIndex] = { id: userId, name, email, city };
-
-    // Save to file
     fs.writeFileSync('./data/users.json', JSON.stringify(users, null, 2));
-     res.render('update_successfully');
+    res.render('update_successfully');
   } else {
     res.status(404).send('❌ User not found');
   }
 });
-
-
-
 
 // ============ RESTful Routes ============
 app.post('/submit', (req, res) => res.send('✅ Data received via POST'));
@@ -190,7 +159,6 @@ app.use((err, req, res, next) => {
   res.status(500).render('error', { error: err });
 });
 
-// ============ 404 Fallback ============
 app.use((req, res) => {
   res.status(404).send("🚫 Page Not Found");
 });
