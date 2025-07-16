@@ -42,7 +42,7 @@ app.get('/contact', (req, res) => {
   res.render('contact');
 });
 
-app.get('/contact-visit', timeLogger, (req, res) => {
+app.get('/contact-visit', timeLogger, (req, res) => { 
   res.send(`📞 Contact Page - Visited at ${req.timeVisited}`);
 });
 
