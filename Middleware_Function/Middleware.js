@@ -1,7 +1,6 @@
-// Middleware.js
-
 export function timeLogger(req, res, next) {
-  req.timeVisited = new Date().toLocaleString(); // Add visit time to request 
-  next();
-  console.log(`[⏰] /contact visited at: ${time}`); 
+  const time = new Date().toLocaleString(); // store the current time
+  req.timeVisited = time;                   // attach to request object
+  console.log(`[⏰] /contact visited at: ${time}`); // log it
+  next(); // move to next middleware/route
 }
