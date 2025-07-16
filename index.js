@@ -14,11 +14,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ============ CONFIG ============
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.set('layout', 'layout');
+app.set('views', path.join(__dirname, 'views')); 
 app.use(expressLayouts); 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
+app.use(express.json());  // Parses JSON data for every incoming request
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
@@ -26,9 +25,19 @@ app.use(methodOverride('_method'));
 const users = JSON.parse(fs.readFileSync('./data/users.json', 'utf-8'));
 
 // ============ ROUTES ============
+app.use(function(req, res ,next){
+  console.log("chal bhai"); 
+  next(); 
+});
 
+app.get("/name" , (req ,res) => {
+  res.send("brother what is your name "); 
+});
 
-
+app.get("/bhai" , (req ,res) => {
+  res.send(" hello bhai jaan ")
+});
+ 
 
 // ============ RESTful Routes ============
 app.post('/submit', (req, res) => res.send('✅ Data received via POST'));
