@@ -1,55 +1,92 @@
-// index.js
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-import methodOverride from 'method-override'; 
-import expressLayouts from 'express-ejs-layouts';
+import express from "express";
+import methodOverride from "method-override";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 const port = 3000;
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// ============ CONFIG ============
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.set('layout', 'layout');
-app.use(expressLayouts); 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
+// Config
 app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride('_method'));
+app.use(methodOverride("_method"));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.static(path.join(__dirname, "public")));
 
-// ============ LOAD USERS ============
-const users = JSON.parse(fs.readFileSync('./data/users.json', 'utf-8'));
+// Dummy data
+let users = [
+  { id: 1, name: "Sushil", email: "sushil@example.com" },
+  { id: 2, name: "Rohan", email: "rohan@example.com" }
+];
 
-// ============ ROUTES ============
-
-
-
-
-// ============ RESTful Routes ============
-app.post('/submit', (req, res) => res.send('✅ Data received via POST'));
-app.put('/update', (req, res) => res.send('🛠️ Data updated with PUT'));
-app.delete('/delete', (req, res) => res.send('❌ Item deleted with DELETE'));
-
-// ============ Error Handling ============
-app.get('/error', (req, res) => {
-  throw new Error("💥 Something went wrong!");
+// Home - Show all users
+app.get("/", (req, res) => {
+  res.render("major_HTTP_methods", { users });
+});
+// Show a single user (GET /user/:id)
+app.get("/user/:id", (req, res) => {
+  const user = users.find(u => u.id === parseInt(req.params.id));
+  if (user) {
+    res.render("user_detail", { user });
+  } else {
+    res.status(404).render("error", { error: new Error("User not found") });
+  }
+});
+// Show all users (GET /user)
+app.get("/user", (req, res) => {
+  res.render("user_list", { users });
 });
 
+
+// POST - Add a user
+app.post("/user", (req, res) => {
+  const { name, email } = req.body;
+  const newUser = {
+    id: users.length ? users[users.length - 1].id + 1 : 1,
+    name,
+    email
+  };
+  users.push(newUser);
+  res.redirect("/");
+});
+
+// PUT - Full update
+app.put("/user/:id", (req, res) => {
+  const user = users.find(u => u.id === parseInt(req.params.id));
+  if (user) {
+    user.name = req.body.name;
+    user.email = req.body.email;
+    res.redirect("/");
+  } else {
+    res.status(404).render("error", { error: new Error("User not found") });
+  }
+});
+
+// PATCH - Partial update
+app.patch("/user/:id", (req, res) => {
+  const user = users.find(u => u.id === parseInt(req.params.id));
+  if (user) {
+    if (req.body.name) user.name = req.body.name;
+    if (req.body.email) user.email = req.body.email;
+    res.redirect("/");
+  } else {
+    res.status(404).render("error", { error: new Error("User not found") });
+  }
+});
+
+// DELETE - Delete user
+app.delete("/user/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  users = users.filter(u => u.id !== id);
+  res.redirect("/");
+});
+
+// Error handler
 app.use((err, req, res, next) => {
-  if (res.headersSent) return next(err);
-  res.status(500).render('error', { error: err });
+  res.status(500).render("error", { error: err });
 });
 
-app.use((req, res) => {
-  res.status(404).send("🚫 Page Not Found");
-});
-
-// ============ Start Server ============
 app.listen(port, () => {
-  console.log(`🚀 Server running at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });

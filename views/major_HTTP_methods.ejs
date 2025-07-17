@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 px-6 py-10">
+
+  <div class="max-w-2xl mx-auto bg-white p-8 rounded shadow space-y-6">
+    <h1 class="text-2xl font-bold text-center text-blue-700">🧑‍💻 User Manager (GET, POST, PUT, PATCH, DELETE)</h1>
+
+    <!-- Users list -->
+    <div>
+      <h2 class="text-xl font-semibold mb-4">📋 All Users</h2>
+      <% if (users.length) { %>
+        <ul class="space-y-4">
+          <% users.forEach(user => { %>
+            <li class="bg-gray-50 border p-4 rounded shadow">
+              <p><strong>Name:</strong> <%= user.name %></p>
+              <p><strong>Email:</strong> <%= user.email %></p>
+
+              <!-- PATCH form -->
+              <form action="/user/<%= user.id %>?_method=PATCH" method="POST" class="mt-2 space-x-2">
+                <input type="text" name="name" placeholder="Change name" class="border px-2 py-1 rounded">
+                <input type="email" name="email" placeholder="Change email" class="border px-2 py-1 rounded">
+                <button type="submit" class="bg-yellow-400 px-3 py-1 rounded">PATCH</button>
+              </form>
+
+              <!-- PUT form -->
+              <form action="/user/<%= user.id %>?_method=PUT" method="POST" class="mt-2 space-x-2">
+                <input type="text" name="name" placeholder="New name" class="border px-2 py-1 rounded">
+                <input type="email" name="email" placeholder="New email" class="border px-2 py-1 rounded">
+                <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded">PUT</button>
+              </form>
+
+              <!-- DELETE -->
+              <form action="/user/<%= user.id %>?_method=DELETE" method="POST" class="mt-2">
+                <button type="submit" class="text-white bg-red-500 px-3 py-1 rounded">DELETE</button>
+              </form>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p>No users found.</p>
+      <% } %>
+    </div>
+
+    <!-- Add user form -->
+    <div>
+      <h2 class="text-xl font-semibold mb-2">➕ Add User (POST)</h2>
+      <form action="/user" method="POST" class="space-x-2">
+        <input type="text" name="name" placeholder="Name" required class="border px-2 py-1 rounded">
+        <input type="email" name="email" placeholder="Email" required class="border px-2 py-1 rounded">
+        <button type="submit" class="bg-green-500 text-white px-4 py-1 rounded">Add</button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>

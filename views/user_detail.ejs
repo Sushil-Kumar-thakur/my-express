@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 px-6 py-10">
+
+  <div class="max-w-xl mx-auto bg-white p-8 rounded shadow">
+    <h1 class="text-2xl font-bold text-center text-blue-700">👤 User Details</h1>
+
+    <div class="mt-4 text-gray-700">
+      <p><strong>Name:</strong> <%= user.name %></p>
+      <p><strong>Email:</strong> <%= user.email %></p>
+    </div>
+
+    <a href="/" class="inline-block mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">⬅ Back</a>
+  </div>
+
+</body>
+</html>

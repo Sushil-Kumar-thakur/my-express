@@ -1,0 +1,29 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>User Updated</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-100 text-gray-800 flex flex-col items-center justify-center min-h-screen px-4">
+
+    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-lg text-center space-y-6">
+        <h1 class="text-2xl font-bold text-blue-700">🔄 Method Used: <span class="uppercase"><%= method %></span></h1>
+
+        <% if (user) { %>
+        <div class="text-left text-gray-700 bg-gray-50 p-4 rounded border">
+            <p class="mb-2"><strong>👤 Name:</strong> <%= user.name %></p>
+            <p><strong>📧 Email:</strong> <%= user.email %></p>
+        </div>
+        <% } else { %>
+        <p class="text-red-600 font-semibold text-lg">❌ User has been deleted!</p>
+        <% } %>
+
+        <a href="/" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+        ⬅️ Back to Home
+        </a>
+    </div>
+
+    </body>
+    </html>
