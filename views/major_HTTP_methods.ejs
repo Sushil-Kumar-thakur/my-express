@@ -10,6 +10,21 @@
   <div class="max-w-2xl mx-auto bg-white p-8 rounded shadow space-y-6">
     <h1 class="text-2xl font-bold text-center text-blue-700">🧑‍💻 User Manager (GET, POST, PUT, PATCH, DELETE)</h1>
 
+     <!-- Add user form -->
+    <div>
+      <h2 class="text-xl font-semibold mb-2">➕ Add User (POST)</h2>
+      <form action="/user" method="POST" class="space-x-2">
+        <input type="text" name="name" placeholder="Name" required class="border px-2 py-1 rounded">
+        <input type="email" name="email" placeholder="Email" required class="border px-2 py-1 rounded">
+        <button type="submit" class="bg-green-500 text-white px-4 py-1 rounded">Add</button>
+        <!--   button to go /user  --> 
+      </form>
+        <a href="/user"> <button  class="bg-green-500 text-white px-4 py-1 rounded mt-4"  >users</button>  </a> 
+      </form>
+    </div>
+  </div>
+
+
     <!-- Users list -->
     <div>
       <h2 class="text-xl font-semibold mb-4">📋 All Users</h2>
@@ -46,16 +61,7 @@
       <% } %>
     </div>
 
-    <!-- Add user form -->
-    <div>
-      <h2 class="text-xl font-semibold mb-2">➕ Add User (POST)</h2>
-      <form action="/user" method="POST" class="space-x-2">
-        <input type="text" name="name" placeholder="Name" required class="border px-2 py-1 rounded">
-        <input type="email" name="email" placeholder="Email" required class="border px-2 py-1 rounded">
-        <button type="submit" class="bg-green-500 text-white px-4 py-1 rounded">Add</button>
-      </form>
-    </div>
-  </div>
+    
 
 </body>
 </html>
