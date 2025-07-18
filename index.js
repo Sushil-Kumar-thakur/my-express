@@ -1,5 +1,6 @@
 // index.js
 import express from 'express';
+import session from 'express-session';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -24,6 +25,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+app.use(session({
+  secret: 'mySecretKey123',  // 🔒 change this in production  //  session   run  time   important middleware
+  resave: false,
+  saveUninitialized: true
+}));
+ app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store'); //          session   run  time   important middleware
+  next();
+});
+ 
 
 // Load users from JSON (if needed)
 const users = JSON.parse(fs.readFileSync('./data/users.json', 'utf-8'));
@@ -41,20 +52,101 @@ app.get("/", (req, res) => {
   });
 });
 
+                                        // login route
+
+
 app.get("/login", (req, res) => {
   res.render('user_login_static');
 });
-
-app.post("/login", user_login_static, (req, res) => {
-  if (req.userRole === 'admin') {
-    return res.send('🔐 Welcome Admin!');
-  } else if (req.userRole === 'user') {
-    return res.send('👋 Welcome User!');
+function requireLogin(req, res, next) {//          session   run  time   important middleware
+  if (req.session && req.session.userName) {
+    next();
   } else {
-    return res.send('⚠️ Unknown Role');
+    res.redirect('/login');
+  }
+}
+
+app.post("/login", user_login_static,requireLogin, (req, res) => {
+  if (req.userRole === 'admin') {
+    return res.redirect('/login/admin');
+  } else if (req.userRole === 'user') {
+    return res.redirect('/login/user');
+  } else {
+    return res.status(403).send('⚠️ Unknown Role: Access Denied');
   }
 });
+// Admin Dashboard
+app.get('/login/admin', (req, res) => {
+  if (req.session.role !== 'admin') {
+    // return res.status(401).send('❌ Access Denied');
+     return res.redirect('/login');
+  }
 
+  res.render('admin', {
+    userName: req.session.userName,
+    totalUsers: 20,
+    activeSessions: 5,
+    recentLogs: ['Admin logged in', 'User added', 'Database synced']
+  });
+});
+
+// User Dashboard
+app.get('/login/user', (req, res) => {
+  if (req.session.role !== 'user') {
+    // return res.status(401).send('❌ Access Denied');
+    return res.redirect('/login');
+  }
+
+  res.render('user_home', {
+    name: req.session.userName
+  });
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy( (err) => {
+    if (err) {
+      return res.status(500).send('Error logging out');
+      }
+    res.redirect('/login');
+  });
+});
+
+
+
+
+
+// app.get('/call',(req ,res) =>{
+//   res.render('call');
+// });
+// app.get('/call/:id', (req, res) => {
+//   res.render('call', {
+//     id: req.params.id
+//     });
+//     });
+
+app.get('/call',(req ,res) =>{
+  res.send('call');
+});
+app.get('/call/:id', (req, res) => {
+  res.send(`brother you will do it, you just do work and you do it    ${req.params.id}`)
+    });
+    
+
+
+// // GET method route
+// app.get('/qwe', (req, res) => {
+//   res.send('GET request to the homepage')
+// })
+
+// // POST method route
+// app.post('/qwe', (req, res) => {
+//   res.send('POST request to the homepage')
+// })
+
+
+
+// Log every request time
+ 
 // User Routes
 app.use('/users', userRoutes);
 
